@@ -76,10 +76,14 @@
         <center><?php echo $message; ?><hr><hr><br>
         <table><tr><td>
         <font color="blue" size="6"><a href="add_appliance.html">Add New Home Appliances</a></font></td></tr><tr><td>
-        <font color="blue" size="6"><a href="set_priority.php">Set Priority to schedule all appliances</a></font></td></tr><tr><td>
-        <font color="blue" size="6"><a href="schedule_dah.php">Get Schedule based on Day Ahead Hourly Pricing</a></font></td></tr><tr><td>
-        <font color="blue" size="6"><a href="schedule_last24h.php">Get Schedule based on last 24 hours 5 minute feed pricing</a></font>
-        </td></tr>
+        <font color="blue" size="6"><a href="set_priority.php">Set Day Slot and priority to schedule all appliances</a></font></td></tr><tr><td>
+        <font color="blue" size="6"><a href="show_db.php">Show priorities and day slots for each appliances</a></font></td></tr><tr><td>
+        <font color="blue" size="6">Day Ahead Hourly Pricing -> </font></td></tr>
+	<tr><td><font color="red" size="5"><a href="schedule_dah.php">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get Schedule without accounting day slots</a></font></td></tr><tr><td>
+	<tr><td><font color="red" size="5"><a href="slot_schedule_dah.php">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get Schedule for each four slots of the day</a></font></td></tr><tr><td>
+        <font color="blue" size="6">Last 24 hours Pricing -> </font></td></tr>
+        <tr><td><font color="red" size="5"><a href="schedule_last24h.php">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get Schedule without accounting day slots</a></font></td></tr>
+        <!--<tr><td><font color="red" size="5"><a href="slot_schedule_last24h.php">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get Schedule for each four slots of the day</a></font></td></tr>-->
         </table>   
         </center>
 

@@ -26,10 +26,12 @@
     while($flag == TRUE){
 
         $option_val = "priority_".$num;
+	$slot_option = "slot_".$num;
 
         if (isset($_POST[$option_val])){
             $priority = $_POST[$option_val];
-            $query = "UPDATE `appliance` SET `priority` = '$priority' WHERE `id` = '$num'";
+	    $day_slot = $_POST[$slot_option];
+            $query = "UPDATE `appliance` SET `priority` = '$priority' , `dayslot` = '$day_slot' WHERE `id` = '$num'";
             $result = mysqli_query($connection, $query) or die(mysqli_error($connection));
             if ($result == TRUE){
                 $message = "WOW : Records are updated successfully into DB";

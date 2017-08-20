@@ -7,7 +7,7 @@
 
     <?php 
 
-        echo "<font size=10 color=blue>Please set priority to all appliances</font><hr><hr><br>";
+        echo "<font size=10 color=blue>List of priority and assigned dayslots to all appliances</font><hr><hr><br>";
 
         $message="";
 
@@ -34,47 +34,42 @@
         if (!$select_db){die("Database Selection Failed" . mysqli_error($connection));}
 
 
-        $query = "SELECT * FROM appliance";
+        $query = "SELECT * FROM appliance order by dayslot";
 
         $result = mysqli_query($connection, $query) or die(mysqli_error($connection));
         $count = mysqli_num_rows($result);
 
         if ($count > 0) {
-
-            echo "<form action=\"write_priority.php\" method=\"POST\"><table BORDER=7 CELLPADDING=7 CELLSPACING=7>";
-
-            $num=1;
-            $option_tag="";
-            while($num <= $count){
-                $option_tag = $option_tag."<option>".$num."</option>";
-                $num++;
-            }
-            
+            echo "<table BORDER=7 CELLPADDING=7 CELLSPACING=7>";	 
             echo "<tr>";
-            echo "<th><font size=5 color=red>Sl No.</font></th>";
+            echo "<th><font size=5 color=red>Priority No.</font></th>";
             echo "<th><font size=5 color=red>Appliance</font></th>";
             echo "<th><font size=5 color=red>Operating Duration</font><font size=3 color=black>(in min)</font></th>";
             echo "<th><font size=5 color=red>Power in KW/hr</font></th>";
-            echo "<th><font size=5 color=red>Select Priority</font></th>";
-            echo "<th><font size=5 color=red>Select Day Slot</font></th>";
+            echo "<th><font size=5 color=red>Assigned Day Slot</font></th>";
             echo "</tr>";
 
             while($row = $result->fetch_assoc()) {
+		$timeslot="";
+		if($row["dayslot"] == 'M'){
+			$timeslot="Morning (5AM - 9AM)";
+		}else if($row["dayslot"] == 'D'){
+			$timeslot="Day (9AM - 5PM)";
+		}else if($row["dayslot"] == 'E'){
+			$timeslot="Evening (5PM - 10PM)";
+		}else if($row["dayslot"] == 'N'){
+			$timeslot="Night (10PM - 5AM)";
+		}
+ 
                 echo "<tr>";
-                echo "<td><font size=4 color=#800080>" . $row["id"]. "</font></td>";
+                echo "<td><font size=4 color=#800080>" . $row["priority"]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $row["name"]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $row["operating_duration"]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $row["usage"]. "</font></td>";
-                echo "<td><select name=\"priority_" .$row["id"]. "\">".$option_tag."</select></td>";
-                echo "<td><select name=\"slot_" .$row["id"]. "\"><option value=\"M\">Morning (5AM - 9AM)</option>";
-                echo "<option value=\"D\" selected=\"selected\">Day (9AM - 5PM)</option>";
-                echo "<option value=\"E\">Evening (5PM - 10PM) </option>";
-                echo "<option value=\"N\">Night (10PM - 5AM)</option>"; 
-		echo "</select></td>";
+                echo "<td><font size=4 color=#800080>" . $timeslot. "</font></td>";
                 echo "</tr>";
             }
             echo "</table>";
-            echo "<input type=\"submit\" name=\"submit\"></form>";
         } else {
 
             $message = 'We are unable to process your request. Please try again later';

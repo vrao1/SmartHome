@@ -33,6 +33,8 @@
 		public $total_consumption;
 		public $start_time;
 		public $end_time;
+		public $dayslot;
+		public $total_bill;
 
 		public function item(){}
 	/*	
@@ -125,10 +127,11 @@
                 //echo $row["operating_duration"]."<BR>";
                 $newAppliance->usage = $row["usage"];
                 $newAppliance->priority = $row["priority"];
+		$newAppliance->dayslot = $row["dayslot"];
                 $newAppliance->setTotal_consumption();
                 $appliances[$totalItem] = $newAppliance;
                 $totalItem++;
-            }    
+	}
     }
     else
     {
@@ -140,7 +143,7 @@
 
     for ($i=0; $i < $totalItem-1; $i++) { 
     	for ($j=$i+1; $j < $totalItem; $j++) { 
-    		if($appliances[$i]->priority < $appliances[$j]->priority){
+    		if($appliances[$i]->priority > $appliances[$j]->priority){
     			$tmp = $appliances[$j];
     			$appliances[$j] = $appliances[$i];
     			$appliances[$i] = $tmp;
@@ -171,9 +174,14 @@
     		}
     	}
 
+	$last_rate = $all_price[$appliances[$i]->end_time];
+	$appliances[$i]->total_bill = ($q * ($last_rate * $appliances[$i]->usage)/60) - ($last_rate * $appliances[$i]->usage)/12;
+
     	for ($n=$appliances[$i]->start_time; $n <= $appliances[$i]->end_time; $n++) { 
-    		$accumulated_price[$n] = $accumulated_price[$n] + ($all_price[$n] * $appliances[$i]->usage)/12 ;
+    		$accumulated_price[$n] = $accumulated_price[$n] + ($all_price[$n] * $appliances[$i]->usage)/12;
+		$appliances[$i]->total_bill = $appliances[$i]->total_bill + ($all_price[$n] * $appliances[$i]->usage)/12;
     	}
+	$appliances[$i]->total_bill = round(($appliances[$i]->total_bill / 100), 2);
     	$i++;
 	}
 
@@ -182,6 +190,14 @@
 <html>
     <head>
         <title>PHPRO Login</title>
+
+<script>
+function setColor(btn){
+    var property = document.getElementById(btn);
+    property.style.backgroundColor = "#00FF00";
+}
+</script>
+
     </head>
     <body>
         <center><?php echo "<font size=6 color=blue>Scheduled Appliances taking account of 5 minute Pricing for past 24 hours till ".$date." from Comed</font>"; ?><hr><hr><br>
@@ -190,18 +206,22 @@
             <th><font size=4 color=red>Sl No.</font></th>
             <th><font size=4 color=red>Appliance</font></th>
             <th><font size=4 color=red>Start Time</font></th>
-            <th><font size=4 color=red>End Time</font></th>
-            </tr>
+	    <th><font size=4 color=red>End Time</font></th>
+	    <th><font size=4 color=red>Total Bill Amount</font><font color=black size=3> (To be paid) </font></th>
+	    <th><font size=3 color=blue>Is it OKAY to you to schedule it?</font></th>
+	    </tr>
 
             <?php
             $i=0;
             while($i < $totalItem)  {
-            	$j=$i+1;
                 echo "<tr>";
-                echo "<td><font size=4 color=#800080>" . $j. "</font></td>";
+                echo "<td><font size=4 color=#800080>" . $appliances[$i]->priority. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $appliances[$i]->name. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $timings[$appliances[$i]->start_time]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $timings[$appliances[$i]->end_time]. "</font></td>";
+		echo "<td><font size=4 color=#800080>$ " .$appliances[$i]->total_bill. "</font></td>";
+		echo "<td><input type=\"button\" value=\"YES\" id=\"button".$i."\" style= \"color:#2F4F4F\" onclick=\"setColor('button".$i."')\";/></td>";
+		#echo "<td><input type=\"button\" value=\"YES\"></td>";
                 echo "</tr>";
                 $i++;
             }
