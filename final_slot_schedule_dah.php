@@ -1,7 +1,5 @@
 <?php
 	session_start();
-//	require('item.php');
-
 	$url = 'https://rrtp.comed.com/api?type=pricingtabledaynexttomorrow';
 	$pattern = "#<td>[\d.]+\&cent;</td>#";
 	$timeThat = "16:30:00";
@@ -12,6 +10,7 @@
 		$pattern = "#<td>[\d.]+\&cent;</td><td>#";
 	}
 	$page = file_get_contents($url);
+
 
 //	$page = '<tr><td>12:00 <small>AM</small></td><td>2.1&cent;</td></tr><tr><td>1:00 <small>AM</small></td><td>2.0&cent;</td></tr><tr><td>2:00 <small>AM</small></td><td>1.9&cent;</td></tr><tr><td>3:00 <small>AM</small></td><td>1.8&cent;</td></tr><tr><td>4:00 <small>AM</small></td><td>1.7&cent;</td></tr><tr><td>5:00 <small>AM</small></td><td>1.7&cent;</td></tr><tr><td>6:00 <small>AM</small></td><td>1.8&cent;</td></tr><tr><td>7:00 <small>AM</small></td><td>2.0&cent;</td></tr><tr><td>8:00 <small>AM</small></td><td>2.3&cent;</td></tr><tr><td>9:00 <small>AM</small></td><td>2.5&cent;</td></tr><tr><td>10:00 <small>AM</small></td><td>2.7&cent;</td></tr><tr><td>11:00 <small>AM</small></td><td>3.1&cent;</td></tr><tr><td>12:00 <small>PM</small></td><td>3.5&cent;</td></tr><tr><td>1:00 <small>PM</small></td><td>4.0&cent;</td></tr><tr><td>2:00 <small>PM</small></td><td>4.3&cent;</td></tr><tr><td>3:00 <small>PM</small></td><td>4.8&cent;</td></tr><tr><td>4:00 <small>PM</small></td><td>5.2&cent;</td></tr><tr><td>5:00 <small>PM</small></td><td>5.3&cent;</td></tr><tr><td>6:00 <small>PM</small></td><td>4.6&cent;</td></tr><tr><td>7:00 <small>PM</small></td><td>4.0&cent;</td></tr><tr><td>8:00 <small>PM</small></td><td>3.5&cent;</td></tr><tr><td>9:00 <small>PM</small></td><td>3.1&cent;</td></tr><tr><td>10:00 <small>PM</small></td><td>2.6&cent;</td></tr><tr><td>11:00 <small>PM</small></td><td>2.4&cent;</td></tr>';
 
@@ -32,7 +31,6 @@
 			}
 		}
 	}
-
 
 	$user_id = $_SESSION['username'];
 
@@ -71,12 +69,12 @@
 		public $start_time;
 		public $end_time;
 		public $slotLengthInMin;
-		public $allotedAppliances = array();
+		public $allotedAppliances;
 		public $totalAllotedAppliances;
 		public $totalCosts;
 
-		public function __construct(){
-			//$this->allotedAppliances = array();
+		public function timeSlots(){
+			$this->allotedAppliances = array();
 			$this->totalAllotedAppliances = 0;
 			$this->totalCosts = 0;
 		}
@@ -86,14 +84,13 @@
 		}
 
 		public function storeNewAppliance($newAppliance){
-			//if($newAppliance == null){
-			//	return;
-			//}
-			$this->allotedAppliances[ ] = $newAppliance;
+			if($newAppliance == null){
+				return;
+			}
+			$this->allotedAppliances[$this->totalAllotedAppliances] = $newAppliance;
 			$this->totalAllotedAppliances = $this->totalAllotedAppliances + 1;	
 		}
 	}
-
 
 	class item{
 		public $id;
@@ -106,16 +103,14 @@
 		public $end_time;
 		public $dayslot;
 		public $total_bill;
-//		public $ignoreFlag;
 
-		public function __construct(){
-//			$this->ignoreFlag = false;
+		public function item(){
+
 		}
 		public function setTotal_consumption(){
 			$this->total_consumption = ($this->usage * $this->operating_duration)/60;
 		}
 	}
-
 
 	$totalMorningItem = 0;
 	$totalDayItem = 0;
@@ -147,8 +142,8 @@
     
     if (!$select_db){die("Database Selection Failed" . mysqli_error($connection));}
 
-
     if (isset($rate) and isset($date)){
+    
 
         $query = "SELECT * FROM time_slots where user_id = '$user_id'";
 
@@ -180,8 +175,10 @@
 	}
     	else
     	{
+        	/*** if we are here, something has gone wrong with the database ***/
         	$message = 'We are unable to process your request. Since timeSlots table has no data.Please try again later.';
     	}
+
 
         $query = "SELECT * FROM appliance where user_id = '$user_id'";
 
@@ -192,8 +189,15 @@
 
         if ($count > 0) {
         	while($row = $result->fetch_assoc()) {
+			$id = $row["id"];
+			$clickedStr = "button".$id;
+
+			if ( ! $_POST[$clickedStr]  || $_POST[$clickedStr] == "NO" ){
+				continue;
+			}
+
         		$newAppliance = new item();
-        		$newAppliance->id = $row["id"];
+        		$newAppliance->id = $id;
                 $newAppliance->name = $row["name"];
                 $newAppliance->operating_duration = $row["operating_duration"];
                 $newAppliance->usage = $row["usage"];
@@ -206,23 +210,20 @@
 				$nullSlotAppliance[$totalNullSlotAppliance] = $newAppliance;
 				$totalNullSlotAppliance = $totalNullSlotAppliance + 1;
 			}else{
-		
-				//$allTimeSlots[$timeSlotPosition[$newAppliance->dayslot]]->storeNewAppliance($newAppliance);
-				$midIndex = $timeSlotPosition[$newAppliance->dayslot];
-				$allTimeSlots[$midIndex]->allotedAppliances[ ] = $newAppliance;
-
-				//$allTimeSlots[$midIndex]->totalAllotedAppliances = sizeof($allTimeSlots[$midIndex]->allotedAppliances);
+				$allTimeSlots[$timeSlotPosition[$newAppliance->dayslot]]->storeNewAppliance($newAppliance);
 			}
 		}catch(Exception $e){
-			echo 'Caught Exception: '. $e->getMessage(). "<BR>";
+			echo 'Caught Exception: '. $e->getMessage(). "\n";
 		}
             }
         }
     }
     else
     {
+        /*** if we are here, something has gone wrong with the database ***/
         $message = 'We are unable to process your request. Since Day Ahead Hourly Price is unavailable now.Please try again later.';
     } 
+
 
 # start New
  if($allTimeSlotsLength > 0){
@@ -280,19 +281,16 @@
 		$all_price[$i] = $all_price[$i-288];
 	}
 
-	$allTimeSlotsCounter = 0;
+	
 	# Iterating through the array containing each time slot along with corresponding allocated appliances
  	foreach($allTimeSlots as $slot){
-
-		$howManyAppliances = sizeof($slot->allotedAppliances);
-
-		if($howManyAppliances == 0){
+		if($slot->totalAllotedAppliances == 0){
 			continue;
 		}
-	
+		
 		#Sort Based on Priority
-    		for ($i=0; $i < $howManyAppliances-1; $i++) { 
-    			for ($j=$i+1; $j < $howManyAppliances; $j++) { 
+    		for ($i=0; $i < ($slot->totalAllotedAppliances)-1; $i++) { 
+    			for ($j=$i+1; $j < $slot->totalAllotedAppliances; $j++) { 
     				if($slot->allotedAppliances[$i]->priority > $slot->allotedAppliances[$j]->priority){
     					$tmp = $slot->allotedAppliances[$j];
     					$slot->allotedAppliances[$j] = $slot->allotedAppliances[$i];
@@ -309,13 +307,10 @@
 
                 $diff =  round((strtotime($date2) - strtotime($date1)) /300);
 
-
                 $slotOffset = $diff < 0 ? -1*$diff : $diff;
-		$itemCount = sizeof($slot->allotedAppliances);
-
     		$i = 0;
-		
-   	 	while($i < $howManyAppliances){
+
+   	 	while($i < $slot->totalAllotedAppliances){
 
     			$q = ($slot->allotedAppliances[$i]->operating_duration)%5;
     			$slots_num = ($slot->allotedAppliances[$i]->operating_duration)/5;
@@ -330,10 +325,7 @@
 			if($totalSlots < $slots_num){
 				$nullSlotAppliance[$totalNullSlotAppliance] = $slot->allotedAppliances[$i];
 				$totalNullSlotAppliance = $totalNullSlotAppliance + 1;
-
-				//$slot->allotedAppliances[$i]->ignoreFlag = true;
-				$i++;
-				continue;
+				continue;			
 			}else if($totalSlots == $slots_num){
     				$slot->allotedAppliances[$i]->start_time = $slotOffset;
     				$slot->allotedAppliances[$i]->end_time = $slots_num-1;
@@ -345,6 +337,7 @@
 					$tillWhatIndex = $j + $slots_num;
 
     					for ($k=$j; $k < $tillWhatIndex; $k++) { 
+
 						$indx = $k;
     						$current_sum = $current_sum + $all_price[$indx] + $accumulated_price[$indx];
     					}
@@ -374,13 +367,10 @@
 			$slot->allotedAppliances[$i]->total_bill = round(($slot->allotedAppliances[$i]->total_bill/100),2);
 
 			$slot->addCost($slot->allotedAppliances[$i]->total_bill);
+
     			$i++;
 		} // end of while
-
-		$allTimeSlotsCounter = $allTimeSlotsCounter + 1;
-
 	} // end of foreach
-
  } // end of if 
 
 # end New     
@@ -411,14 +401,13 @@ function setColor(btn){
 	<?php
 	if($allTimeSlotsLength>0){
 	       # Iterating through the array containing each time slot along with corresponding allocated appliances
-		
+		$totalCosts = 0;
         	foreach($allTimeSlots as $slot){
-
-			if (sizeof($slot->allotedAppliances) > 0){
+			$cost = 0;
+			if ($slot->totalAllotedAppliances > 0){
 	?>
         <center><font size=5 color=purple> <HR><?php echo "Economical Schedule of appliances in \"<font color=green><b>".$slot->name."</b></font>\" from ".$slot->start_time." till ".$slot->end_time." on the date mentioned above"; ?></font></center>
 
-	<form id="schedule" name="schedule" method="POST" onsubmit="return myFunction();">
         <table BORDER=7 CELLPADDING=7 CELLSPACING=7>
             <tr>
             <th><font size=4 color=black>Priority No.</font></th>
@@ -426,31 +415,21 @@ function setColor(btn){
             <th><font size=4 color=black>Start Time</font></th>
             <th><font size=4 color=black>End Time</font></th>
             <th><font size=4 color=black>Total Bill Amount (In Cents)</font><font color=black size=3> (To be paid) </font></th>
-            <th colspan="2"><font size=3 color=blue>Is it OKAY to you to schedule it?</font></th>
             </tr>
 
             <?php
             $i=0;
-            while($i < sizeof($slot->allotedAppliances)){
-	//	if ( $slot->allotedAppliances[$i]->ignoreFlag == true ){
-	//		continue;
-	//		$i++;
-	//	}
-
-	    	$suffix = $slot->allotedAppliances[$i]->id;	
-
+            while($i < $slot->totalAllotedAppliances){
                 echo "<tr>";
                 echo "<td><font size=4 color=#800080>" . $slot->allotedAppliances[$i]->priority. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $slot->allotedAppliances[$i]->name. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $timings[$slot->allotedAppliances[$i]->start_time]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $timings[$slot->allotedAppliances[$i]->end_time]. "</font></td>";
                 echo "<td><font size=4 color=#800080>&cent; " . ($slot->allotedAppliances[$i]->total_bill/10). "</font></td>";
-               	echo "<td><input name = \"button".$suffix."\" type=radio id=\"button_yes".$suffix."\" value=\"YES\"><label>YES</label></td>";
-                echo "<td><input name = \"button".$suffix."\" type=radio id=\"button_no".$suffix."\" value=\"NO\"><label>NO</label></td>";
                 echo "</tr>";
+		$cost = $cost + $slot->allotedAppliances[$i]->total_bill;
+		$totalCosts = $totalCosts + $slot->allotedAppliances[$i]->total_bill;
                 $i++;
-		$totalItemId[$totalItem] = $suffix;
-		$totalItem++;
             }
             ?>
 
@@ -459,8 +438,7 @@ function setColor(btn){
             <td></td>
             <td></td>
             <td></td>
-            <td><font size=4 color=black>&cent; <?php $totalCosts = $slot->totalCosts/10; echo $totalCosts;?></font><font color=black size=3> (To be paid) </font></td>
-            <td colspan="2"></td>
+            <td><font size=4 color=black>&cent; <?php $cost = $cost/10; echo $cost;?></font><font color=black size=3> (To be paid) </font></td>
             </tr>
 
         </table> 
@@ -469,7 +447,7 @@ function setColor(btn){
 		}
 		else
 		{
-                	echo "<center><HR><font size=5 color=black> Sorry ! You don't have any appliance to be scheduled in <font color=green><b>\"".$slot->name."\"</b></font> Hours for the date mentioned above</center><HR></BR>";
+                	echo "<center><HR><font size=5 color=black> Sorry ! You don't have any appliance to be scheduled in <font color=green><b>".$slot->name."</b></font> Hours for the date mentioned above</center><HR></BR>";
 		}
 	      } // End of Foreach
 	}else{
@@ -477,83 +455,10 @@ function setColor(btn){
 	}
 
 	?>
+           <center><font size=5 color=green>You need to pay total = &cent; <?php $totalCosts = $totalCosts/10; echo $totalCosts;?></font></center>
 
-	<input type="submit" value="Re-Execute" id="button_re"/>
-	</form>
-	<HR>
-	<?php
-	if ($totalNullSlotAppliance > 0){
-	?>
-
-         <center><HR><font size=5 color=black> Following are appliances which either hasn't been assigned slot or the length of the assigned slot does not accommodate it's operating duration</center><HR></BR>
-
-	<form id="reassign" name="reassign" action="reassign_slots.php" method="POST">
-        <table BORDER=7 CELLPADDING=7 CELLSPACING=7>
-            <tr>
-            <th><font size=4 color=black>Priority No.</font></th>
-            <th><font size=4 color=black>Appliance</font></th>
-            <th><font size=4 color=black>Usage</font></th>
-            <th><font size=4 color=black>Operating Duration</font></th>
-	<?php
-	    $i = 0;
-            while($i < $totalNullSlotAppliance){
-                echo "<tr>";
-                echo "<td><font size=4 color=#800080>" . $nullSlotAppliance[$i]->priority. "</font></td>";
-                echo "<td><font size=4 color=#800080>" . $nullSlotAppliance[$i]->name. "</font></td>";
-                echo "<td><font size=4 color=#800080>" . $nullSlotAppliance[$i]->usage. "</font></td>";
-                echo "<td><font size=4 color=#800080>" . $nullSlotAppliance[$i]->operating_duration. "</font></td>";
-                echo "</tr>";
-                $i++;
-            }
-            echo "</table>";
-            echo "<font size=4 color=green>To Re-Assign slots please click this button </font>";
-            echo "<input type=hidden id=appliances_str name=appliances_str value=". base64_encode(serialize($nullSlotAppliance)) ." >";
-	    echo "<input type=submit value=Re-Assign >";
-	    echo "</form>";
-	}
-	?>
 	<HR>
 	<BR>
         <font color="blue" size="6"><a href="login_page.php">BACK</a></font> 
-        </center>
-    	<script>
-		function myFunction() {
-			var button = "button";
-
-			var totalItem = "<?php echo $totalItem ?>";
-			var i = 0;
-			var totalItemId = new Array();
-   				<?php foreach ($totalItemId as $item) : ?>
-   					totalItemId[i]= <?php echo $item ?>;
-					i++;
-   				<?php endforeach; ?>
-			var k = 0;
-
-			while (k<totalItem){
-				var key = button + totalItemId[k].toString();
-				var radios = document.getElementsByName(key);
-
-				var howManyOptions = radios.length;
-				var isChecked = false;
-
-				for (var j=0;j < howManyOptions;j++){
-					if(radios[j].checked == true){
-						isChecked = true;
-						break;
-					}
-				}
-
-				if (isChecked == false){
-					alert("Kindly Click \"YES\" or \"NO\" radio button of each row");
-					document.schedule.action = "slot_schedule_dah.php";
-					return false;
-				}
-				k++;
-			}
-
-			document.schedule.action = "final_slot_schedule_dah.php";
-			return true;
-		}
-	</script>
 	</body>
 </html>

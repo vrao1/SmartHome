@@ -3,18 +3,27 @@
 <head>
 	<title>Welcome to Smart Home Website</title>
 </head>
+        <style>
+        body {
+        background-image: url("./images/Location.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        }
+        </style>
 <body>
+<center><font size=10 color=black><h1>
+You are most welcome to your Smart Home Interface</h1>
+<HR>
+<div style=\"text-align:right\"><h5><font color=black>New User ? <a href="sign_up.html">Sign Up</a></font></h5></div>
 <hr>
-<center><font size=10 color=red>
-You are most welcome to your Smart Home Interface
-<font color=blue>Please login to access the website:</font>
-</font><br><br><br><form action="login_page.php" method="POST">
-<hr>
+<font color=blue><h3>Please login to access the website:</h3></font>
+</font><form action="validate_login.php" method="POST">
 <table>
-<tr><td>Login :</td>
+<tr><td><font size=6 color=purple>Login :</font></td>
 <td><input type="text" name="username"></td>
 </tr><tr><td>
-Password :</td><td>
+<font size=6 color=purple>Password :</font></td><td>
 <input type="password" name="password"></td></tr>
 </table>
 <input type="submit" name="submit">

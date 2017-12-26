@@ -5,14 +5,6 @@
     <head>
         <title>Appliance Scheduling</title>
     </head>
-        <style>
-        body {
-        background-image: url("./images/blueLight.jpeg");
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-        }
-        </style>
     <body><center>
 
     <?php 
@@ -28,10 +20,10 @@
 			$this->allRows = "";
 			$this->tableHeaderStr = "<table BORDER=7 CELLPADDING=7 CELLSPACING=7>";
             		$this->tableHeaderStr .= "<tr>";
-            		$this->tableHeaderStr .= "<th><font size=5 color=black>Sl No.</font></th>";
-            		$this->tableHeaderStr .= "<th><font size=5 color=black>Appliance</font></th>";
-            		$this->tableHeaderStr .= "<th><font size=5 color=black>Operating Duration</font><font size=3 color=black>(in min)</font></th>";
-            		$this->tableHeaderStr .= "<th><font size=5 color=black>Select Priority</font></th>";
+            		$this->tableHeaderStr .= "<th><font size=5 color=red>Sl No.</font></th>";
+            		$this->tableHeaderStr .= "<th><font size=5 color=red>Appliance</font></th>";
+            		$this->tableHeaderStr .= "<th><font size=5 color=red>Operating Duration</font><font size=3 color=black>(in min)</font></th>";
+            		$this->tableHeaderStr .= "<th><font size=5 color=red>Select Priority</font></th>";
             		$this->tableHeaderStr .= "</tr>";
 		}
 
@@ -124,7 +116,7 @@
         $resultAll = mysqli_query($connection, $queryAll) or die(mysqli_error($connection));
         $countAll = mysqli_num_rows($resultAll);
 
-        $queryCount = "select count(name) as total, dayslot from appliance where user_id = '$user_id' group by (dayslot)";
+        $queryCount = "select count(name) as total, dayslot from appliance where user_id = '$user_id' group by (dayslot) order by total;";
 
         $resultCount = mysqli_query($connection, $queryCount) or die(mysqli_error($connection));
         $countCount = mysqli_num_rows($resultCount);
@@ -133,8 +125,14 @@
        		while($rowCount = $resultCount->fetch_assoc()) {
 			$count = $rowCount["total"];
 			$dayslot = $rowCount["dayslot"];
-			$slotNames[$dayslot] = $count;
+			echo "<BR>Count = ".$count."<BR>";
+			echo "Dayslot = ".$dayslot."<BR>";
+			$slotNames[$dayslot] = $countCount;
 			$slotNamesCounter[$dayslot] = 0;
+			echo "*****************************<BR>";
+			foreach($slotNames as $key => $value){
+				echo "{$key} => {$value}<BR>";
+			}
 		}
 	}
 

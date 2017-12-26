@@ -3,6 +3,14 @@
 <head>
 	<title>Welcome to Smart Home Website</title>
 </head>
+        <style>
+        body {
+        background-image: url("./images/makan.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        }
+        </style>
 <body>
 <hr>
 <center><font size=10 color=red>
@@ -11,9 +19,9 @@ Please add new appliances:</font></font>
 <form action="submit_appliance.php" method="POST">
 <hr>
 <table>
-<tr><td><font color=#800080>Name of Appliance :</font></td><td><input type="text" name="appliancename"></td><td></td></tr>
-<tr><td><font color=#800080>Watt Usage (watt/hour) :</font></td><td><input type="text" name="watt"></td><td></td></tr>
-<tr><td><font color=#800080>Operating Duration :</font></td><td>Hours : <input type="text" name="hours"></td><td>Minutes : <input type="text" name="minutes"></td></tr></font>
+<tr><td><font color=#800080><h2>Name of Appliance :</h2></font></td><td><input type="text" name="appliancename"></td><td></td></tr>
+<tr><td><font color=#800080><h2>Watt Usage (watt/hour) :</h2></font></td><td><input type="text" name="watt"></td><td></td></tr>
+<tr><td><font color=#800080><h2>Operating Duration :</font></td><td>Hours : <input type="text" name="hours"></td><td>Minutes : </h2><input type="text" name="minutes"></td></tr></font>
 </table>
 <input type="submit" name="submit">
 </form>

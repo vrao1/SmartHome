@@ -1,7 +1,8 @@
     <?php
-    
+
+    session_start();
     $message="hi";
-    
+    $user_id = $_SESSION['username']; 
 
     /*** connect to database ***/
     /*** mysql hostname ***/
@@ -37,7 +38,7 @@
         $minutes = $minutes + ($hours*60);
     
     //3.1.2 Checking the values are existing in the database or not
-        $query = "INSERT INTO `appliance` (`name`,`usage`,`operating_duration`) VALUES ('$appliancename','$watt','$minutes')";
+        $query = "INSERT INTO `appliance` (`name`,`usage`,`operating_duration`, `user_id`) VALUES ('$appliancename','$watt','$minutes','$user_id')";
 
         $result = mysqli_query($connection, $query) or die(mysqli_error($connection));
         
@@ -60,6 +61,14 @@
     <head>
         <title>SUBMISSION</title>
     </head>
+        <style>
+        body {
+        background-image: url("./images/cat.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        }
+        </style>
     <body>
         <center><?php echo $message; ?><hr><hr><br>
         <table><tr><td>

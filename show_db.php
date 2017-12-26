@@ -1,11 +1,23 @@
+<?php
+	session_start();
+?>
 
        <html>
     <head>
         <title>Appliance Scheduling</title>
     </head>
+        <style>
+        body {
+        background-image: url("./images/blueLight.jpeg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        }
+        </style>
     <body><center>
 
     <?php 
+	$user_id = $_SESSION['username'];
 
         echo "<font size=10 color=blue>List of priority and assigned dayslots to all appliances</font><hr><hr><br>";
 
@@ -34,7 +46,7 @@
         if (!$select_db){die("Database Selection Failed" . mysqli_error($connection));}
 
 
-        $query = "SELECT * FROM appliance order by dayslot";
+        $query = "select A.name,A.priority,A.operating_duration,B.start,B.end , A.dayslot from appliance A, time_slots B where A.dayslot = B.slot_name and A.user_id = B.user_id and A.user_id = '$user_id';";
 
         $result = mysqli_query($connection, $query) or die(mysqli_error($connection));
         $count = mysqli_num_rows($result);
@@ -42,11 +54,12 @@
         if ($count > 0) {
             echo "<table BORDER=7 CELLPADDING=7 CELLSPACING=7>";	 
             echo "<tr>";
-            echo "<th><font size=5 color=red>Priority No.</font></th>";
-            echo "<th><font size=5 color=red>Appliance</font></th>";
-            echo "<th><font size=5 color=red>Operating Duration</font><font size=3 color=black>(in min)</font></th>";
-            echo "<th><font size=5 color=red>Power in KW/hr</font></th>";
-            echo "<th><font size=5 color=red>Assigned Day Slot</font></th>";
+            echo "<th><font size=5 color=black>Priority No.</font></th>";
+            echo "<th><font size=5 color=black>Appliance</font></th>";
+            echo "<th><font size=5 color=black>Operating Duration</font><font size=3 color=black>(in min)</font></th>";
+            echo "<th><font size=5 color=black>Assigned Day Slot</font></th>";
+            echo "<th><font size=5 color=black>Start Timing</font></th>";
+            echo "<th><font size=5 color=black>End Timing</font></th>";
             echo "</tr>";
 
             while($row = $result->fetch_assoc()) {
@@ -65,8 +78,9 @@
                 echo "<td><font size=4 color=#800080>" . $row["priority"]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $row["name"]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $row["operating_duration"]. "</font></td>";
-                echo "<td><font size=4 color=#800080>" . $row["usage"]. "</font></td>";
-                echo "<td><font size=4 color=#800080>" . $timeslot. "</font></td>";
+                echo "<td><font size=4 color=#800080>" . $row["dayslot"]. "</font></td>";
+                echo "<td><font size=4 color=#800080>" . $row["start"]. "</font></td>";
+                echo "<td><font size=4 color=#800080>" . $row["end"]. "</font></td>";
                 echo "</tr>";
             }
             echo "</table>";
@@ -75,7 +89,7 @@
             $message = 'We are unable to process your request. Please try again later';
         }
         if(isset($message)){
-                echo $message; 
+                echo "<font color=black size=6>".$message."</font><BR><BR>"; 
         }
     ?>
 

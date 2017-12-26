@@ -1,5 +1,6 @@
 <?php
 	session_start();
+
 	$url = 'https://rrtp.comed.com/api?type=pricingtabledaynexttomorrow';
 	$pattern = "#<td>[\d.]+\&cent;</td>#";
 	$timeThat = "16:30:00";
@@ -33,12 +34,10 @@
 	}
 
 	$totalCost=0;
-
-	$user_id = $_SESSION['username'];
-
 	$date = date('Y-m-d');
 	$hour = date('H');
 	$min = date('i') + ($hour * 60);
+	$user_id = $_SESSION['username'];
 
 	if($min > 990){
 		$date = strtotime("+1 day");
@@ -152,7 +151,7 @@
             $message = "ERROR : Records are not added into DB";
         }
 
-        $query = "SELECT * FROM appliance where user_id = '$user_id'";
+        $query = "SELECT * FROM appliance where user_id='$user_id'";
 
         $result = mysqli_query($connection, $query) or die(mysqli_error($connection));
         $count = mysqli_num_rows($result);
@@ -202,13 +201,33 @@
     	$token = strtok(":");
     }
 
-//	$summation = 0;
- //   for ($i = 0;$i <288;$i++){
-//	echo $i." = ".$all_price[$i]."</BR>";
-//	$summation = $summation + $all_price[$i];
- //   }
-//	echo "Total Sum of the entire day price = ".$summation."</BR>";
+    $NULL_Items = array();
+    $NULL_Items_No = 0;
+	
+    for ($i=0; $i < $totalItem; $i++){
+	$clickedStr = "button".$i;
+    	if ($_POST[$clickedStr] == "NO"){
+		$appliances[$i] = null;
+		$NULL_Items[$NULL_Items_No] = $i;
+		$NULL_Items_No++;
+	}
+    }
 
+    $null = 0;
+
+    for ($i=$totalItem-1 ; $i >= 0 ; $i--){
+    	if ($null < $NULL_Items_No){
+		if($appliances[$i] != null){
+			$appliances[$NULL_Items[$null]] = $appliances[$i];
+			$null++;
+		}
+	}else{
+		break;
+	}
+    }			
+
+    $totalItem = $totalItem - $NULL_Items_No;
+    
     for ($i=0; $i < $totalItem-1; $i++) { 
     	for ($j=$i+1; $j < $totalItem; $j++) { 
     		if($appliances[$i]->priority > $appliances[$j]->priority){
@@ -278,21 +297,19 @@ function setColor(btn){
         }
         </style>
     <body>
-        <center><?php echo "<font size=6 color=blue>The most economic schedule for each appliance across the 24 hours duration for the date ".$date."</font>"; ?><hr><hr><br>
-	<form name="schedule" method="POST" onsubmit="return myFunction();">
+        <center><?php echo "<font size=6 color=blue>Scheduled Appliances taking account of Day Ahead Pricing from Comed for the date ".$date."</font>"; ?><hr><hr><br>
         <table BORDER=7 CELLPADDING=7 CELLSPACING=7>
             <tr>
             <th><font size=4 color=black>Priority No.</font></th>
             <th><font size=4 color=black>Appliance</font></th>
             <th><font size=4 color=black>Start Time</font></th>
             <th><font size=4 color=black>End Time</font></th>
-            <th><font size=4 color=black>Total Bill Amount (In Cents)</font><font color=black size=3> (To be paid) </font></th>
-            <th colspan="2"><font size=3 color=blue>Is it OKAY to you to schedule it?</font></th>
+            <th><font size=4 color=black>Total Bill Amount (in cents)</font><font color=black size=3> (To be paid) </font></th>
+            <!--<th><font size=3 color=blue>Is it OKAY to you to schedule it?</font></th>-->
             </tr>
 
             <?php
 	    $i = 0;	
-	    $j = 0;
             while($i < $totalItem)  {
 		$j = $i + 1;
                 echo "<tr>";
@@ -302,10 +319,6 @@ function setColor(btn){
                 echo "<td><font size=4 color=#800080>" . $date." ".$timings[$appliances[$i]->start_time]. "</font></td>";
                 echo "<td><font size=4 color=#800080>" . $date." ".$timings[$appliances[$i]->end_time]. "</font></td>";
                 echo "<td><font size=4 color=#800080>&cent; " . ($appliances[$i]->total_bill/10). "</font></td>";
-                echo "<td><input name = \"button".$i."\" type=radio id=\"button_yes".$i."\" value=\"YES\"><label for=\"button_yes".$i."\">YES</label></td>";
-                echo "<td><input name = \"button".$i."\" type=radio id=\"button_no".$i."\" value=\"NO\"><label for=\"button_yes".$i."\">NO</label></td>";
-                #echo "<td><input name = \"button".$i."\" type=radio id=\"button_yes".$i."\" value=\"YES\"><label>YES</label></td>";
-                #echo "<td><input name = \"button".$i."\" type=radio id=\"button_no".$i."\" value=\"NO\"><label>NO</label></td>";
                 echo "</tr>";
                 $i++;
             }
@@ -317,52 +330,10 @@ function setColor(btn){
             <td></td>
             <td></td>
             <td><font size=4 color=black>&cent; <?php $totalCost = $totalCost/10; echo $totalCost;?></font><font color=black size=3> (To be paid) </font></td>
-            <td colspan="2"></td>
             </tr>
-
         </table>  
-
-	<!--<input type="submit" value="Re-Execute" id="button_re" onclick="myFunction()"/>-->
-	<input type="submit" value="Re-Execute" id="button_re"/>
-	</form>
-	<BR>
-	<BR>
         <font color="blue" size="6"><a href="login_page.php">BACK</a></font> 
         </center>
-    	<script>
-		function myFunction() {
 
-			var button = "button";
-
-			var totalItem = "<?php echo $totalItem ?>";
-			var i = 0;
-
-
-			while (i<totalItem){
-
-				var key = button + i.toString();
-				var radios = document.getElementsByName(key);
-				var howManyRadios = radios.length;
-				var isChecked = false;
-
-				for(var j=0;j < howManyRadios;j++){
-					if(radios[j].checked == true){
-						isChecked = true;
-						break;
-					}
-				}
-
-				if(isChecked == true){
-					i++;
-				}else{
-					alert("Please click either \"YES\" or \"NO\" buttons for all rows");
-					document.schedule.action = "schedule_dah.php";
-					return false;
-				}
-			}
-				document.schedule.action = "final_schedule_dah.php";
-				return true;
-		}
-	</script>
     </body>
 </html>
